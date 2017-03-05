@@ -1,0 +1,41 @@
+HDFS High Availability (HA)
+
+Problem:  As you know in Hadoop 1.x architecture Name Node was a single point of failure, which means if your Name Node daemon is down 
+somehow, you don’t have access to your Hadoop Cluster than after. How to deal with this problem?
+
+Solution:  Hadoop 2.x is featured with Name Node HA which is referred as HDFS High Availability (HA).
+
+Hadoop 2.x supports two Name Nodes at a time one node is active and another is standby node
+Active Name Node handles the client operations in the cluster
+StandBy Name Node manages metadata same as Secondary Name Node in Hadoop 1.x
+When Active Name Node is down, Standby Name Node takes over and will handle the client operations then after
+HDFS HA can be configured by two ways
+Using Shared NFS Directory
+Using Quorum Journal Manager
+
+HDFS Federation
+
+Problem:  HDFS uses namespaces for managing directories, file and block level information in cluster. Hadoop 1.x architecture was able to manage
+ only single namespace in a whole cluster with the help of the Name Node (which is a single point of failure in Hadoop 1.x). Once that Name Node is 
+down you loose access of full cluster data. It was not possible for partial data availability based on name space.
+
+Solution:  Above problem is solved by HDFS Federation i Hadoop 2.x Architecture which allows to manage multiple namespaces by enabling multiple
+ Name Nodes. So on HDFS shell you have multiple directories available but it may be possible that two different directories are managed by two
+ active Name Nodes at a time.
+
+
+Handling Failures During Writing a File
+
+1. The pipeline is closed and any packets in the ack queue are added to the front of the data
+queue
+2. The current block on the good DataNodes is given a new identity, which is communicated to
+the NameNode
+3. The failed DataNode is removed from the pipeline, and a new pipeline is constructed from
+the two good DataNodes
+4. The remainder of the block’s data is written to the good DataNodes in the pipeline
+5. The NameNode notices that the block is under-replicated, and it arranges for a further
+replica to be created on another node
+6. As long as dfs.namenode.replication.min replicas (which defaults to 1) are written, the
+write will succeed
+7. The block will be asynchronously replicated across the cluster until its target replication
+factor is reached (dfs.replication, which defaults to 3)
